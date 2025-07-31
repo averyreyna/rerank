@@ -1,1 +1,1 @@
-# textrank-and-lexrank
+# rerank
