@@ -38,16 +38,16 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, isProcessing }) =
   return (
     <div className="w-full max-w-2xl mx-auto">
       <div
-        className={`border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-colors ${
-          isProcessing ? 'opacity-50 cursor-not-allowed' : 'hover:border-gray-400'
+        className={`border-2 border-dashed border-grey-300 rounded-lg p-8 text-center transition-colors ${
+          isProcessing ? 'opacity-50 cursor-not-allowed' : 'hover:border-grey-400'
         }`}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
       >
         <div className="space-y-4">
-          <div className="text-gray-500">
+          <div className="text-grey-500">
             <svg
-              className="mx-auto h-12 w-12 text-gray-400"
+              className="mx-auto h-12 w-12 text-grey-400"
               stroke="currentColor"
               fill="none"
               viewBox="0 0 48 48"
@@ -61,9 +61,9 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, isProcessing }) =
             </svg>
           </div>
           <div>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-grey-600">
               Drop your text file here, or{' '}
-              <label className="text-blue-600 hover:text-blue-500 cursor-pointer">
+              <label className="text-grey-700 hover:text-black cursor-pointer font-medium underline">
                 browse
                 <input
                   type="file"
@@ -74,7 +74,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, isProcessing }) =
                 />
               </label>
             </p>
-            <p className="text-sm text-gray-400 mt-2">
+            <p className="text-sm text-grey-400 mt-2">
               Supports .txt, .md, and .csv files
             </p>
           </div>

@@ -44,13 +44,13 @@ function App() {
   }, [numSentences]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-grey-50 font-abc-diatype">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-white border-b border-grey-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
-            <h1 className="text-2xl font-bold text-gray-900">Rerank</h1>
-            <div className="text-sm text-gray-500">
+            <h1 className="text-2xl font-bold text-black">Rerank</h1>
+            <div className="text-sm text-grey-600">
               Powered by multiple summarization models
             </div>
           </div>
@@ -62,13 +62,13 @@ function App() {
         {/* Controls */}
         <div className="mb-8 flex justify-center">
           <div className="flex items-center space-x-4">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-grey-700">
               Summary length:
             </label>
             <select
               value={numSentences}
               onChange={(e) => setNumSentences(Number(e.target.value))}
-              className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border border-grey-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-grey-400"
               disabled={isProcessing}
             >
               <option value={2}>2 sentences</option>
@@ -85,8 +85,8 @@ function App() {
         {/* Processing Indicator */}
         {isProcessing && (
           <div className="flex justify-center mt-8">
-            <div className="flex items-center space-x-2 text-gray-600">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+            <div className="flex items-center space-x-2 text-grey-600">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-grey-600"></div>
               <span>Processing text with multiple summarization models...</span>
             </div>
           </div>
@@ -99,25 +99,25 @@ function App() {
         {results.length === 0 && !isProcessing && (
           <div className="mt-16 text-center">
             <div className="max-w-2xl mx-auto">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              <h2 className="text-lg font-semibold text-black mb-4">
                 Fast Text Summarization for Data Annotation
               </h2>
-              <p className="text-gray-600 mb-6">
+              <p className="text-grey-600 mb-6">
                 Upload your text files to get instant summaries using TextRank, LexRank, and frequency-based algorithms. 
                 Perfect for quickly analyzing interview transcripts, research documents, and large text datasets.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <h3 className="font-semibold text-gray-800 mb-2">TextRank</h3>
-                  <p className="text-gray-600">Graph-based ranking algorithm that identifies important sentences based on their relationships.</p>
+                <div className="bg-white p-4 rounded-lg border border-grey-200">
+                  <h3 className="font-semibold text-grey-800 mb-2">TextRank</h3>
+                  <p className="text-grey-600">Graph-based ranking algorithm that identifies important sentences based on their relationships.</p>
                 </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <h3 className="font-semibold text-gray-800 mb-2">LexRank</h3>
-                  <p className="text-gray-600">Similarity-based approach using cosine similarity and centrality scoring.</p>
+                <div className="bg-white p-4 rounded-lg border border-grey-200">
+                  <h3 className="font-semibold text-grey-800 mb-2">LexRank</h3>
+                  <p className="text-grey-600">Similarity-based approach using cosine similarity and centrality scoring.</p>
                 </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <h3 className="font-semibold text-gray-800 mb-2">Frequency-Based</h3>
-                  <p className="text-gray-600">Traditional approach scoring sentences by word frequency and importance.</p>
+                <div className="bg-white p-4 rounded-lg border border-grey-200">
+                  <h3 className="font-semibold text-grey-800 mb-2">Frequency-Based</h3>
+                  <p className="text-grey-600">Traditional approach scoring sentences by word frequency and importance.</p>
                 </div>
               </div>
             </div>
