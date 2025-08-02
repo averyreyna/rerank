@@ -1,6 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import FileUpload from './components/FileUpload';
 import SummaryResults from './components/SummaryResults';
+import InfoButton from './components/InfoButton';
+import ProjectModal from './components/ProjectModal';
 import { 
   textRankSummarize, 
   lexRankSummarize, 
@@ -13,6 +15,7 @@ function App() {
   const [filename, setFilename] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [numSentences, setNumSentences] = useState<number>(3);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const handleFileSelect = useCallback(async (content: string, fileName: string) => {
     setIsProcessing(true);
@@ -124,6 +127,15 @@ function App() {
           </div>
         )}
       </div>
+
+      {/* Info Button */}
+      <InfoButton onClick={() => setIsModalOpen(true)} />
+
+      {/* Project Modal */}
+      <ProjectModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+      />
     </div>
   );
 }

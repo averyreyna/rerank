@@ -1,10 +1,10 @@
 import Sentiment from 'sentiment';
 
 export interface QualityMetrics {
-  coverage: number; // 0-1, how much of the original text is represented
-  coherence: number; // 0-1, how well sentences flow together
-  diversity: number; // 0-1, how diverse the vocabulary is
-  confidence: number; // 0-1, overall confidence in the summary
+  coverage: number;
+  coherence: number;
+  diversity: number;
+  confidence: number;
   sentiment: {
     score: number;
     comparative: number;
@@ -47,7 +47,7 @@ function tokenizeSentences(text: string): string[] {
   return text
     .split(/[.!?]+/)
     .map(s => s.trim())
-    .filter(s => s.length > 10); // Filter out very short sentences
+    .filter(s => s.length > 10);
 }
 
 // Calculate cosine similarity between two sentences
