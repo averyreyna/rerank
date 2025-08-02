@@ -1,10 +1,45 @@
-// Text summarization utilities implementing TextRank and LexRank algorithms
+import Sentiment from 'sentiment';
+
+export interface QualityMetrics {
+  coverage: number; // 0-1, how much of the original text is represented
+  coherence: number; // 0-1, how well sentences flow together
+  diversity: number; // 0-1, how diverse the vocabulary is
+  confidence: number; // 0-1, overall confidence in the summary
+  sentiment: {
+    score: number;
+    comparative: number;
+    positive: string[];
+    negative: string[];
+  };
+}
+
+export interface SentenceNode {
+  id: string;
+  text: string;
+  score: number;
+  sentiment: number;
+  connections: { target: string; weight: number }[];
+  position?: { x: number; y: number };
+}
+
+export interface TopicCluster {
+  id: string;
+  keywords: string[];
+  sentences: string[];
+  centroid: number[];
+  color: string;
+}
 
 export interface SummaryResult {
   method: string;
   summary: string;
   sentences: string[];
   processingTime: number;
+  qualityMetrics: QualityMetrics;
+  visualizationData: {
+    sentenceGraph: SentenceNode[];
+    topicClusters: TopicCluster[];
+  };
 }
 
 // Simple sentence tokenizer
@@ -32,17 +67,141 @@ function cosineSimilarity(sent1: string, sent2: string): number {
   return magnitude1 && magnitude2 ? dotProduct / (magnitude1 * magnitude2) : 0;
 }
 
+// Initialize sentiment analyzer
+const sentiment = new Sentiment();
+
+// Calculate quality metrics for a summary
+function calculateQualityMetrics(
+  originalText: string, 
+  summaryText: string, 
+  selectedSentences: string[],
+  allSentences: string[]
+): QualityMetrics {
+  // Coverage: ratio of unique words in summary vs original
+  const originalWords = new Set(originalText.toLowerCase().match(/\b\w+\b/g) || []);
+  const summaryWords = new Set(summaryText.toLowerCase().match(/\b\w+\b/g) || []);
+  const coverage = summaryWords.size / originalWords.size;
+
+  // Coherence: average similarity between consecutive sentences in summary
+  let coherenceSum = 0;
+  for (let i = 0; i < selectedSentences.length - 1; i++) {
+    coherenceSum += cosineSimilarity(selectedSentences[i], selectedSentences[i + 1]);
+  }
+  const coherence = selectedSentences.length > 1 ? coherenceSum / (selectedSentences.length - 1) : 1;
+
+  // Diversity: ratio of unique words to total words in summary
+  const totalSummaryWords = summaryText.toLowerCase().match(/\b\w+\b/g) || [];
+  const diversity = summaryWords.size / totalSummaryWords.length;
+
+  // Confidence: weighted combination of metrics
+  const confidence = (coverage * 0.4 + coherence * 0.3 + diversity * 0.3);
+
+  // Sentiment analysis
+  const sentimentResult = sentiment.analyze(summaryText);
+
+  return {
+    coverage: Math.round(coverage * 100) / 100,
+    coherence: Math.round(coherence * 100) / 100,
+    diversity: Math.round(diversity * 100) / 100,
+    confidence: Math.round(confidence * 100) / 100,
+    sentiment: {
+      score: sentimentResult.score,
+      comparative: Math.round(sentimentResult.comparative * 100) / 100,
+      positive: sentimentResult.positive,
+      negative: sentimentResult.negative
+    }
+  };
+}
+
+// Generate visualization data
+function generateVisualizationData(
+  sentences: string[], 
+  scores: number[], 
+  similarityMatrix: number[][]
+): { sentenceGraph: SentenceNode[]; topicClusters: TopicCluster[] } {
+  // Create sentence nodes for graph visualization
+  const sentenceGraph: SentenceNode[] = sentences.map((sentence, i) => {
+    const sentimentScore = sentiment.analyze(sentence).comparative;
+    const connections = sentences.map((_, j) => ({
+      target: `sentence-${j}`,
+      weight: similarityMatrix[i]?.[j] || 0
+    })).filter(conn => conn.weight > 0.1 && conn.target !== `sentence-${i}`);
+
+    return {
+      id: `sentence-${i}`,
+      text: sentence.slice(0, 100) + (sentence.length > 100 ? '...' : ''),
+      score: scores[i] || 0,
+      sentiment: sentimentScore,
+      connections
+    };
+  });
+
+  // Simple topic clustering based on word overlap
+  const topicClusters = generateTopicClusters(sentences);
+
+  return { sentenceGraph, topicClusters };
+}
+
+// Generate topic clusters using simple k-means-like approach
+function generateTopicClusters(sentences: string[]): TopicCluster[] {
+  const words = sentences.flatMap(s => 
+    s.toLowerCase().match(/\b\w{4,}\b/g) || []
+  );
+  
+  const wordFreq: { [key: string]: number } = {};
+  words.forEach(word => {
+    wordFreq[word] = (wordFreq[word] || 0) + 1;
+  });
+
+  // Get top keywords
+  const topWords = Object.entries(wordFreq)
+    .sort(([,a], [,b]) => b - a)
+    .slice(0, 12)
+    .map(([word]) => word);
+
+  // Create clusters based on keyword presence
+  const clusters: TopicCluster[] = [];
+  const colors = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B'];
+  
+  for (let i = 0; i < Math.min(3, Math.ceil(topWords.length / 4)); i++) {
+    const clusterKeywords = topWords.slice(i * 4, (i + 1) * 4);
+    const clusterSentences = sentences.filter(sentence => 
+      clusterKeywords.some(keyword => 
+        sentence.toLowerCase().includes(keyword)
+      )
+    );
+
+    if (clusterSentences.length > 0) {
+      clusters.push({
+        id: `cluster-${i}`,
+        keywords: clusterKeywords,
+        sentences: clusterSentences.map(s => s.slice(0, 80) + '...'),
+        centroid: [Math.random() * 100, Math.random() * 100], // Simplified
+        color: colors[i % colors.length]
+      });
+    }
+  }
+
+  return clusters;
+}
+
 // TextRank implementation
 export function textRankSummarize(text: string, numSentences: number = 3): SummaryResult {
   const startTime = Date.now();
   const sentences = tokenizeSentences(text);
   
   if (sentences.length <= numSentences) {
+    const summary = sentences.join('. ') + '.';
+    const qualityMetrics = calculateQualityMetrics(text, summary, sentences, sentences);
+    const visualizationData = generateVisualizationData(sentences, sentences.map(() => 1), []);
+    
     return {
       method: 'TextRank',
-      summary: sentences.join('. ') + '.',
+      summary,
       sentences,
-      processingTime: Date.now() - startTime
+      processingTime: Date.now() - startTime,
+      qualityMetrics,
+      visualizationData
     };
   }
   
@@ -89,12 +248,21 @@ export function textRankSummarize(text: string, numSentences: number = 3): Summa
     .sort((a, b) => a.index - b.index);
   
   const summary = rankedSentences.map(item => item.sentence).join('. ') + '.';
+  const selectedSentences = rankedSentences.map(item => item.sentence);
+  
+  // Calculate quality metrics
+  const qualityMetrics = calculateQualityMetrics(text, summary, selectedSentences, sentences);
+  
+  // Generate visualization data
+  const visualizationData = generateVisualizationData(sentences, scores, similarityMatrix);
   
   return {
     method: 'TextRank',
     summary,
-    sentences: rankedSentences.map(item => item.sentence),
-    processingTime: Date.now() - startTime
+    sentences: selectedSentences,
+    processingTime: Date.now() - startTime,
+    qualityMetrics,
+    visualizationData
   };
 }
 
@@ -104,11 +272,17 @@ export function lexRankSummarize(text: string, numSentences: number = 3): Summar
   const sentences = tokenizeSentences(text);
   
   if (sentences.length <= numSentences) {
+    const summary = sentences.join('. ') + '.';
+    const qualityMetrics = calculateQualityMetrics(text, summary, sentences, sentences);
+    const visualizationData = generateVisualizationData(sentences, sentences.map(() => 1), []);
+    
     return {
       method: 'LexRank',
-      summary: sentences.join('. ') + '.',
+      summary,
       sentences,
-      processingTime: Date.now() - startTime
+      processingTime: Date.now() - startTime,
+      qualityMetrics,
+      visualizationData
     };
   }
   
@@ -156,12 +330,21 @@ export function lexRankSummarize(text: string, numSentences: number = 3): Summar
     .sort((a, b) => a.index - b.index);
   
   const summary = rankedSentences.map(item => item.sentence).join('. ') + '.';
+  const selectedSentences = rankedSentences.map(item => item.sentence);
+  
+  // Calculate quality metrics
+  const qualityMetrics = calculateQualityMetrics(text, summary, selectedSentences, sentences);
+  
+  // Generate visualization data
+  const visualizationData = generateVisualizationData(sentences, scores, similarityMatrix);
   
   return {
     method: 'LexRank',
     summary,
-    sentences: rankedSentences.map(item => item.sentence),
-    processingTime: Date.now() - startTime
+    sentences: selectedSentences,
+    processingTime: Date.now() - startTime,
+    qualityMetrics,
+    visualizationData
   };
 }
 
@@ -171,11 +354,17 @@ export function frequencyBasedSummarize(text: string, numSentences: number = 3):
   const sentences = tokenizeSentences(text);
   
   if (sentences.length <= numSentences) {
+    const summary = sentences.join('. ') + '.';
+    const qualityMetrics = calculateQualityMetrics(text, summary, sentences, sentences);
+    const visualizationData = generateVisualizationData(sentences, sentences.map(() => 1), []);
+    
     return {
       method: 'Frequency-Based',
-      summary: sentences.join('. ') + '.',
+      summary,
       sentences,
-      processingTime: Date.now() - startTime
+      processingTime: Date.now() - startTime,
+      qualityMetrics,
+      visualizationData
     };
   }
   
@@ -204,11 +393,29 @@ export function frequencyBasedSummarize(text: string, numSentences: number = 3):
     .sort((a, b) => a.index - b.index);
   
   const summary = rankedSentences.map(item => item.sentence).join('. ') + '.';
+  const selectedSentences = rankedSentences.map(item => item.sentence);
+  
+  // Calculate quality metrics
+  const qualityMetrics = calculateQualityMetrics(text, summary, selectedSentences, sentences);
+  
+  // Create a simple similarity matrix for visualization (based on word overlap)
+  const similarityMatrix: number[][] = [];
+  for (let i = 0; i < sentences.length; i++) {
+    similarityMatrix[i] = [];
+    for (let j = 0; j < sentences.length; j++) {
+      similarityMatrix[i][j] = i === j ? 0 : cosineSimilarity(sentences[i], sentences[j]);
+    }
+  }
+  
+  // Generate visualization data
+  const visualizationData = generateVisualizationData(sentences, sentenceScores, similarityMatrix);
   
   return {
     method: 'Frequency-Based',
     summary,
-    sentences: rankedSentences.map(item => item.sentence),
-    processingTime: Date.now() - startTime
+    sentences: selectedSentences,
+    processingTime: Date.now() - startTime,
+    qualityMetrics,
+    visualizationData
   };
 }
