@@ -3,14 +3,17 @@ import { SummaryResult } from '../utils/textSummarization';
 import QualityMetrics from './QualityMetrics';
 import SentenceGraph from './SentenceGraph';
 import TopicClusters from './TopicClusters';
+import DatasetAnalytics from './DatasetAnalytics';
+import QualityAssessment from './QualityAssessment';
 
 interface SummaryResultsProps {
   results: SummaryResult[];
   filename: string;
+  originalText: string;
 }
 
-const SummaryResults: React.FC<SummaryResultsProps> = ({ results, filename }) => {
-  const [activeTab, setActiveTab] = useState<'summaries' | 'analysis' | 'visualization'>('summaries');
+const SummaryResults: React.FC<SummaryResultsProps> = ({ results, filename, originalText }) => {
+  const [activeTab, setActiveTab] = useState<'summaries' | 'analysis' | 'visualization' | 'dataset-analytics' | 'quality-assessment'>('summaries');
 
   if (results.length === 0) return null;
 
@@ -22,16 +25,18 @@ const SummaryResults: React.FC<SummaryResultsProps> = ({ results, filename }) =>
 
       {/* Tab Navigation */}
       <div className="border-b border-grey-200">
-        <nav className="-mb-px flex space-x-8">
+        <nav className="-mb-px flex space-x-4 md:space-x-8 overflow-x-auto">
           {[
             { id: 'summaries', label: 'Summaries', count: results.length },
             { id: 'analysis', label: 'Quality Analysis', count: null },
-            { id: 'visualization', label: 'Visualizations', count: null }
+            { id: 'visualization', label: 'Visualizations', count: null },
+            { id: 'dataset-analytics', label: 'Dataset Analytics', count: null },
+            { id: 'quality-assessment', label: 'Quality Assessment', count: null }
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
                 activeTab === tab.id
                   ? 'border-grey-600 text-grey-800'
                   : 'border-transparent text-grey-500 hover:text-grey-700 hover:border-grey-300'
@@ -117,6 +122,21 @@ const SummaryResults: React.FC<SummaryResultsProps> = ({ results, filename }) =>
             </div>
           ))}
         </div>
+      )}
+
+      {activeTab === 'dataset-analytics' && (
+        <DatasetAnalytics 
+          results={results} 
+          originalText={originalText} 
+          filename={filename} 
+        />
+      )}
+
+      {activeTab === 'quality-assessment' && (
+        <QualityAssessment 
+          results={results} 
+          originalText={originalText} 
+        />
       )}
     </div>
   );

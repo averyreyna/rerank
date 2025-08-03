@@ -13,6 +13,7 @@ import {
 function App() {
   const [results, setResults] = useState<SummaryResult[]>([]);
   const [filename, setFilename] = useState<string>('');
+  const [originalText, setOriginalText] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [numSentences, setNumSentences] = useState<number>(3);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -20,6 +21,7 @@ function App() {
   const handleFileSelect = useCallback(async (content: string, fileName: string) => {
     setIsProcessing(true);
     setFilename(fileName);
+    setOriginalText(content);
     setResults([]);
 
     try {
@@ -95,8 +97,12 @@ function App() {
           </div>
         )}
 
-        {/* Results */}
-        <SummaryResults results={results} filename={filename} />
+        {/* Results with Tabbed Interface */}
+        <SummaryResults 
+          results={results} 
+          filename={filename} 
+          originalText={originalText}
+        />
 
         {/* Footer Info */}
         {results.length === 0 && !isProcessing && (

@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.506fdb43.css",
-    "main.js": "/static/js/main.efa9b045.js",
+    "main.css": "/static/css/main.dce11f99.css",
+    "main.js": "/static/js/main.76393ac0.js",
     "static/media/ABCDiatype-BlackItalic-Trial.woff": "/static/media/ABCDiatype-BlackItalic-Trial.cc22109a2186bbf22e2b.woff",
     "static/media/ABCDiatype-Black-Trial.woff": "/static/media/ABCDiatype-Black-Trial.658c621ba86b6968e178.woff",
     "static/media/ABCDiatype-HeavyItalic-Trial.woff": "/static/media/ABCDiatype-HeavyItalic-Trial.2dd6fcc64bb22da5b00d.woff",
@@ -35,11 +35,11 @@
     "static/media/ABCDiatype-ThinItalic-Trial.woff2": "/static/media/ABCDiatype-ThinItalic-Trial.69cf71db2204a006d223.woff2",
     "static/media/ABCDiatype-Thin-Trial.woff2": "/static/media/ABCDiatype-Thin-Trial.c62beb8ddac316db5c5f.woff2",
     "index.html": "/index.html",
-    "main.506fdb43.css.map": "/static/css/main.506fdb43.css.map",
-    "main.efa9b045.js.map": "/static/js/main.efa9b045.js.map"
+    "main.dce11f99.css.map": "/static/css/main.dce11f99.css.map",
+    "main.76393ac0.js.map": "/static/js/main.76393ac0.js.map"
   },
   "entrypoints": [
-    "static/css/main.506fdb43.css",
-    "static/js/main.efa9b045.js"
+    "static/css/main.dce11f99.css",
+    "static/js/main.76393ac0.js"
   ]
 }
