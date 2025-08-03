@@ -6,7 +6,7 @@ import ProjectModal from './components/ProjectModal';
 import { 
   textRankSummarize, 
   lexRankSummarize, 
-  frequencyBasedSummarize,
+  bartSummarize,
   SummaryResult 
 } from './utils/textSummarization';
 
@@ -34,9 +34,9 @@ function App() {
       const lexRankResult = lexRankSummarize(content, numSentences);
       summaryResults.push(lexRankResult);
       
-      // Frequency-based
-      const freqResult = frequencyBasedSummarize(content, numSentences);
-      summaryResults.push(freqResult);
+      // BART (async)
+      const bartResult = await bartSummarize(content, numSentences);
+      summaryResults.push(bartResult);
       
       setResults(summaryResults);
     } catch (error) {
@@ -106,7 +106,7 @@ function App() {
                 Fast Text Summarization for Data Annotation
               </h2>
               <p className="text-grey-600 mb-6">
-                Upload your text files to get instant summaries using TextRank, LexRank, and frequency-based algorithms. 
+                Upload your text files to get instant summaries using TextRank, LexRank, and BART transformer model. 
                 Perfect for quickly analyzing interview transcripts, research documents, and large text datasets.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
@@ -119,8 +119,8 @@ function App() {
                   <p className="text-grey-600">Similarity-based approach using cosine similarity and centrality scoring.</p>
                 </div>
                 <div className="bg-white p-4 rounded-lg border border-grey-200">
-                  <h3 className="font-semibold text-grey-800 mb-2">Frequency-Based</h3>
-                  <p className="text-grey-600">Traditional approach scoring sentences by word frequency and importance.</p>
+                  <h3 className="font-semibold text-grey-800 mb-2">BART</h3>
+                  <p className="text-grey-600">State-of-the-art transformer model for abstractive summarization by Facebook AI.</p>
                 </div>
               </div>
             </div>

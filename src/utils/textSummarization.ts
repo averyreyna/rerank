@@ -119,18 +119,31 @@ function generateVisualizationData(
   scores: number[], 
   similarityMatrix: number[][]
 ): { sentenceGraph: SentenceNode[]; topicClusters: TopicCluster[] } {
-  // Create sentence nodes for graph visualization
-  const sentenceGraph: SentenceNode[] = sentences.map((sentence, i) => {
+  // Limit visualization to top 25 sentences to improve performance
+  const MAX_NODES = 25;
+  
+  // Get indices of top scoring sentences
+  const rankedIndices = sentences
+    .map((_, index) => ({ index, score: scores[index] || 0 }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, Math.min(MAX_NODES, sentences.length))
+    .map(item => item.index);
+
+  // Create sentence nodes for graph visualization (only for top sentences)
+  const sentenceGraph: SentenceNode[] = rankedIndices.map((originalIndex) => {
+    const sentence = sentences[originalIndex];
     const sentimentScore = sentiment.analyze(sentence).comparative;
-    const connections = sentences.map((_, j) => ({
-      target: `sentence-${j}`,
-      weight: similarityMatrix[i]?.[j] || 0
-    })).filter(conn => conn.weight > 0.1 && conn.target !== `sentence-${i}`);
+    
+    // Only create connections to other top sentences
+    const connections = rankedIndices.map((targetIndex) => ({
+      target: `sentence-${targetIndex}`,
+      weight: similarityMatrix[originalIndex]?.[targetIndex] || 0
+    })).filter(conn => conn.weight > 0.1 && conn.target !== `sentence-${originalIndex}`);
 
     return {
-      id: `sentence-${i}`,
+      id: `sentence-${originalIndex}`,
       text: sentence.slice(0, 100) + (sentence.length > 100 ? '...' : ''),
-      score: scores[i] || 0,
+      score: scores[originalIndex] || 0,
       sentiment: sentimentScore,
       connections
     };
@@ -348,74 +361,113 @@ export function lexRankSummarize(text: string, numSentences: number = 3): Summar
   };
 }
 
-// Simple extractive summarization (frequency-based)
-export function frequencyBasedSummarize(text: string, numSentences: number = 3): SummaryResult {
+// BART-based abstractive summarization using Hugging Face API
+export async function bartSummarize(text: string, numSentences: number = 3): Promise<SummaryResult> {
   const startTime = Date.now();
   const sentences = tokenizeSentences(text);
   
-  if (sentences.length <= numSentences) {
-    const summary = sentences.join('. ') + '.';
-    const qualityMetrics = calculateQualityMetrics(text, summary, sentences, sentences);
-    const visualizationData = generateVisualizationData(sentences, sentences.map(() => 1), []);
+  try {
+    // Use Hugging Face's free inference API for BART
+    const response = await fetch('https://api-inference.huggingface.co/models/facebook/bart-large-cnn', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        inputs: text.slice(0, 1024), // Limit input size for API
+        parameters: {
+          max_length: Math.min(150, numSentences * 50),
+          min_length: Math.min(50, numSentences * 15),
+          do_sample: false
+        }
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`BART API error: ${response.status}`);
+    }
+
+    const result = await response.json();
+    let summary = result[0]?.summary_text || text.slice(0, 200) + '...';
+    
+    // Split BART summary into sentences for consistency with other methods
+    const summarySentences = tokenizeSentences(summary);
+    
+    // Calculate quality metrics
+    const qualityMetrics = calculateQualityMetrics(text, summary, summarySentences, sentences);
+    
+    // Create sentence scores based on similarity to summary
+    const sentenceScores: number[] = sentences.map((sentence: string) => {
+      return cosineSimilarity(sentence, summary);
+    });
+    
+    // Create a similarity matrix for visualization
+    const similarityMatrix: number[][] = [];
+    for (let i = 0; i < sentences.length; i++) {
+      similarityMatrix[i] = [];
+      for (let j = 0; j < sentences.length; j++) {
+        similarityMatrix[i][j] = i === j ? 0 : cosineSimilarity(sentences[i], sentences[j]);
+      }
+    }
+    
+    // Generate visualization data
+    const visualizationData = generateVisualizationData(sentences, sentenceScores, similarityMatrix);
     
     return {
-      method: 'Frequency-Based',
+      method: 'BART',
       summary,
-      sentences,
+      sentences: summarySentences,
+      processingTime: Date.now() - startTime,
+      qualityMetrics,
+      visualizationData
+    };
+    
+  } catch (error) {
+    console.error('BART summarization failed:', error);
+    
+    // Fallback to simple extractive summarization
+    const words = text.toLowerCase().match(/\b\w+\b/g) || [];
+    const wordFreq: { [key: string]: number } = {};
+    
+    words.forEach((word: string) => {
+      if (word.length > 3) {
+        wordFreq[word] = (wordFreq[word] || 0) + 1;
+      }
+    });
+    
+    const sentenceScores: number[] = sentences.map((sentence: string) => {
+      const sentenceWords: string[] = sentence.toLowerCase().match(/\b\w+\b/g) || [];
+      const score: number = sentenceWords.reduce((sum: number, word: string) => sum + (wordFreq[word] || 0), 0);
+      return score / sentenceWords.length;
+    });
+    
+    const rankedSentences = sentences
+      .map((sentence, index) => ({ sentence, score: sentenceScores[index], index }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, numSentences)
+      .sort((a, b) => a.index - b.index);
+    
+    const summary = rankedSentences.map(item => item.sentence).join('. ') + '.';
+    const selectedSentences = rankedSentences.map(item => item.sentence);
+    const qualityMetrics = calculateQualityMetrics(text, summary, selectedSentences, sentences);
+    
+    const similarityMatrix: number[][] = [];
+    for (let i = 0; i < sentences.length; i++) {
+      similarityMatrix[i] = [];
+      for (let j = 0; j < sentences.length; j++) {
+        similarityMatrix[i][j] = i === j ? 0 : cosineSimilarity(sentences[i], sentences[j]);
+      }
+    }
+    
+    const visualizationData = generateVisualizationData(sentences, sentenceScores, similarityMatrix);
+    
+    return {
+      method: 'BART (Fallback)',
+      summary,
+      sentences: selectedSentences,
       processingTime: Date.now() - startTime,
       qualityMetrics,
       visualizationData
     };
   }
-  
-  // Calculate word frequencies
-  const words = text.toLowerCase().match(/\b\w+\b/g) || [];
-  const wordFreq: { [key: string]: number } = {};
-  
-  words.forEach((word: string) => {
-    if (word.length > 3) { // Ignore short words
-      wordFreq[word] = (wordFreq[word] || 0) + 1;
-    }
-  });
-  
-  // Score sentences based on word frequencies
-  const sentenceScores: number[] = sentences.map((sentence: string) => {
-    const sentenceWords: string[] = sentence.toLowerCase().match(/\b\w+\b/g) || [];
-    const score: number = sentenceWords.reduce((sum: number, word: string) => sum + (wordFreq[word] || 0), 0);
-    return score / sentenceWords.length; // Normalize by sentence length
-  });
-  
-  // Get top sentences
-  const rankedSentences = sentences
-    .map((sentence, index) => ({ sentence, score: sentenceScores[index], index }))
-    .sort((a, b) => b.score - a.score)
-    .slice(0, numSentences)
-    .sort((a, b) => a.index - b.index);
-  
-  const summary = rankedSentences.map(item => item.sentence).join('. ') + '.';
-  const selectedSentences = rankedSentences.map(item => item.sentence);
-  
-  // Calculate quality metrics
-  const qualityMetrics = calculateQualityMetrics(text, summary, selectedSentences, sentences);
-  
-  // Create a simple similarity matrix for visualization (based on word overlap)
-  const similarityMatrix: number[][] = [];
-  for (let i = 0; i < sentences.length; i++) {
-    similarityMatrix[i] = [];
-    for (let j = 0; j < sentences.length; j++) {
-      similarityMatrix[i][j] = i === j ? 0 : cosineSimilarity(sentences[i], sentences[j]);
-    }
-  }
-  
-  // Generate visualization data
-  const visualizationData = generateVisualizationData(sentences, sentenceScores, similarityMatrix);
-  
-  return {
-    method: 'Frequency-Based',
-    summary,
-    sentences: selectedSentences,
-    processingTime: Date.now() - startTime,
-    qualityMetrics,
-    visualizationData
-  };
 }

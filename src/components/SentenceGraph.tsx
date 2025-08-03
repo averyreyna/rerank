@@ -154,7 +154,8 @@ const SentenceGraph: React.FC<SentenceGraphProps> = ({
         className="border border-grey-100 rounded"
       />
       <p className="text-xs text-grey-500 mt-2">
-        Circle size = importance score • Lines = sentence similarity • Hover for details
+        Circle size = importance score • Lines = sentence similarity • Hover for details<br/>
+        <span className="text-grey-400">Showing top 25 most important sentences for performance</span>
       </p>
     </div>
   );
