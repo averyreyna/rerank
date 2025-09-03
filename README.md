@@ -6,8 +6,8 @@ Rerank is a text summarization tool that compares multiple algorithms to help yo
 
 Before you begin, ensure you have the following installed:
 
-• Node.js (v16 or later)
-• npm (v8 or later)
+- Node.js (v16 or later)
+- npm (v8 or later)
 
 ## Local Development
 
