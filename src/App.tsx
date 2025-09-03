@@ -101,7 +101,7 @@ function App() {
               </h2>
               <p className="text-grey-600 mb-6">
                 Upload your text files to get instant summaries using TextRank, LexRank, and BART transformer model. 
-                Perfect for quickly analyzing interview transcripts, research documents, and large text datasets.
+                Perfect for analyzing interview transcripts, research documents, and large text datasets.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
                 <div className="bg-white p-4 rounded-lg border border-grey-200">
