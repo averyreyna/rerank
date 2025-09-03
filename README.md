@@ -34,7 +34,7 @@ npm start
 
 ## Available Scripts
 
-• `npm start` - Start the development server
-• `npm run build` - Build the application for production
-• `npm test` - Run the test suite
-• `npm run eject` - Eject from Create React App (irreversible)
+- `npm start` - Start the development server
+- `npm run build` - Build the application for production  
+- `npm test` - Run the test suite
+- `npm run eject` - Eject from Create React App (irreversible)

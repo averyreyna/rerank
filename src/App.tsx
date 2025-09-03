@@ -25,18 +25,14 @@ function App() {
     setResults([]);
 
     try {
-      // Run all summarization methods
       const summaryResults: SummaryResult[] = [];
       
-      // TextRank
       const textRankResult = textRankSummarize(content, numSentences);
       summaryResults.push(textRankResult);
       
-      // LexRank
       const lexRankResult = lexRankSummarize(content, numSentences);
       summaryResults.push(lexRankResult);
       
-      // BART (async)
       const bartResult = await bartSummarize(content, numSentences);
       summaryResults.push(bartResult);
       
@@ -50,7 +46,6 @@ function App() {
 
   return (
     <div className="min-h-screen bg-grey-50 font-abc-diatype">
-      {/* Header */}
       <div className="bg-white border-b border-grey-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
@@ -62,9 +57,7 @@ function App() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Controls */}
         <div className="mb-8 flex justify-center">
           <div className="flex items-center space-x-4">
             <label className="text-sm font-medium text-grey-700">
@@ -83,11 +76,8 @@ function App() {
             </select>
           </div>
         </div>
-
-        {/* File Upload */}
         <FileUpload onFileSelect={handleFileSelect} isProcessing={isProcessing} />
 
-        {/* Processing Indicator */}
         {isProcessing && (
           <div className="flex justify-center mt-8">
             <div className="flex items-center space-x-2 text-grey-600">
@@ -97,14 +87,12 @@ function App() {
           </div>
         )}
 
-        {/* Results with Tabbed Interface */}
         <SummaryResults 
           results={results} 
           filename={filename} 
           originalText={originalText}
         />
 
-        {/* Footer Info */}
         {results.length === 0 && !isProcessing && (
           <div className="mt-16 text-center">
             <div className="max-w-2xl mx-auto">
@@ -133,11 +121,8 @@ function App() {
           </div>
         )}
       </div>
-
-      {/* Info Button */}
       <InfoButton onClick={() => setIsModalOpen(true)} />
 
-      {/* Project Modal */}
       <ProjectModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
