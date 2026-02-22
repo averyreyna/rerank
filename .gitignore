@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+
+# Build output
+build/
+dist/
+.next/
+out/
+
+# Environment and secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+
+# Logs and debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Runtime / cache
+.npm
+.yarn-integrity
+.eslintcache
+*.tsbuildinfo
+.cache/
+
+# Testing
+coverage/
+.nyc_output/
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Optional local config (e.g. Claude, Cursor)
+.claude/settings.local.json
