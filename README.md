@@ -2,6 +2,8 @@
 
 Rerank is a text summarization tool that compares multiple algorithms to help you extract key insights from documents. The application uses TextRank, LexRank, and BART models to analyze your text in real time, offering different approaches to summarization and allowing you to choose the most effective method for your specific content.
 
+![](rerank.gif)
+
 ## Prerequisites
 
 Before you begin, ensure you have the following installed:
