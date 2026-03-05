@@ -19,7 +19,7 @@ const QualityMetrics: React.FC<QualityMetricsProps> = ({ metrics }) => {
   };
 
   const getSentimentDisplay = () => {
-    const { score, comparative } = metrics.sentiment;
+    const { comparative } = metrics.sentiment;
     if (comparative > 0.1) return { text: 'Positive', color: 'text-green-600' };
     if (comparative < -0.1) return { text: 'Negative', color: 'text-red-600' };
     return { text: 'Neutral', color: 'text-grey-600' };
