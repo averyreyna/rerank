@@ -23,7 +23,6 @@ const SummaryResults: React.FC<SummaryResultsProps> = ({ results, filename, orig
         Results for: <span className="font-medium">{filename}</span>
       </div>
 
-      {/* Tab Navigation */}
       <div className="border-b border-grey-200">
         <nav className="-mb-px flex space-x-4 md:space-x-8 overflow-x-auto">
           {[
@@ -53,7 +52,6 @@ const SummaryResults: React.FC<SummaryResultsProps> = ({ results, filename, orig
         </nav>
       </div>
 
-      {/* Tab Content */}
       {activeTab === 'summaries' && (
         <div className="space-y-6">
           {results.map((result, index) => (

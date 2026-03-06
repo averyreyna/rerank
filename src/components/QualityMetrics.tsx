@@ -30,8 +30,7 @@ const QualityMetrics: React.FC<QualityMetricsProps> = ({ metrics }) => {
   return (
     <div className="bg-white p-4 rounded-lg border border-grey-200">
       <h4 className="text-sm font-semibold text-grey-800 mb-3">Quality Analysis</h4>
-      
-      {/* Overall Confidence Score */}
+
       <div className="mb-4 p-3 rounded-lg bg-grey-50">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-grey-700">Overall Confidence</span>
@@ -47,7 +46,6 @@ const QualityMetrics: React.FC<QualityMetricsProps> = ({ metrics }) => {
         </div>
       </div>
 
-      {/* Detailed Metrics */}
       <div className="grid grid-cols-2 gap-3 mb-4">
         <div className="text-center">
           <div className="text-lg font-bold text-grey-800">{(metrics.coverage * 100).toFixed(0)}%</div>
@@ -71,7 +69,6 @@ const QualityMetrics: React.FC<QualityMetricsProps> = ({ metrics }) => {
         </div>
       </div>
 
-      {/* Sentiment Details */}
       {(metrics.sentiment.positive.length > 0 || metrics.sentiment.negative.length > 0) && (
         <div className="border-t border-grey-100 pt-3">
           <div className="grid grid-cols-2 gap-3 text-xs">

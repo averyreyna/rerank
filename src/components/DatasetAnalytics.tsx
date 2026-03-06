@@ -35,7 +35,6 @@ const DatasetAnalytics: React.FC<DatasetAnalyticsProps> = ({
   filename 
 }) => {
   const estimateSyllables = (word: string): number => {
-    // Simple syllable estimation
     word = word.toLowerCase();
     if (word.length <= 3) return 1;
     word = word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
@@ -45,15 +44,13 @@ const DatasetAnalytics: React.FC<DatasetAnalyticsProps> = ({
   };
 
   const calculateMetrics = (): DatasetMetrics => {
-    // Basic text analysis
     const words: string[] = originalText.toLowerCase().match(/\b\w+\b/g) || [];
     const sentences = originalText.split(/[.!?]+/).filter(s => s.trim().length > 0);
     const vocabulary = new Set(words);
-    
-    // Word frequency analysis
+
     const wordFreq: { [key: string]: number } = {};
     words.forEach(word => {
-      if (word.length > 3) { // Filter short words
+      if (word.length > 3) {
         wordFreq[word] = (wordFreq[word] || 0) + 1;
       }
     });
@@ -63,15 +60,14 @@ const DatasetAnalytics: React.FC<DatasetAnalyticsProps> = ({
       .slice(0, 10)
       .map(([word, count]) => ({ word, count }));
 
-    // Simple readability score (Flesch Reading Ease approximation)
     const avgSentenceLength = words.length / sentences.length;
     const totalSyllables = words.reduce((sum: number, word: string) => sum + estimateSyllables(word), 0);
     const avgSyllables = totalSyllables / words.length;
-    const readabilityScore = Math.max(0, Math.min(100, 
+    // flesch reading ease formula constants
+    const readabilityScore = Math.max(0, Math.min(100,
       206.835 - (1.015 * avgSentenceLength) - (84.6 * avgSyllables)
     ));
 
-    // Sentiment distribution from results
     let sentimentDistribution = { positive: 0, negative: 0, neutral: 0 };
     if (results.length > 0) {
       results.forEach(result => {
@@ -82,7 +78,6 @@ const DatasetAnalytics: React.FC<DatasetAnalyticsProps> = ({
       });
     }
 
-    // Quality metrics comparison
     const qualityMetricsComparison = results.map(result => ({
       method: result.method,
       coverage: result.qualityMetrics.coverage,
@@ -92,7 +87,7 @@ const DatasetAnalytics: React.FC<DatasetAnalyticsProps> = ({
     }));
 
     return {
-      documentCount: 1, // Single document for now
+      documentCount: 1,
       totalWords: words.length,
       totalSentences: sentences.length,
       avgWordsPerSentence: Math.round(words.length / sentences.length * 10) / 10,
@@ -113,8 +108,7 @@ const DatasetAnalytics: React.FC<DatasetAnalyticsProps> = ({
   return (
     <div className="mt-8 bg-white rounded-lg border border-grey-200 p-6">
       <h2 className="text-xl font-bold text-black mb-6">Dataset Analytics</h2>
-      
-      {/* Document Overview */}
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <div className="text-center p-4 bg-blue-50 rounded-lg">
           <div className="text-2xl font-bold text-blue-600">{metrics.totalWords.toLocaleString()}</div>
@@ -135,7 +129,6 @@ const DatasetAnalytics: React.FC<DatasetAnalyticsProps> = ({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Vocabulary Analysis */}
         <div>
           <h3 className="text-lg font-semibold text-black mb-4">Top Keywords</h3>
           <div className="space-y-2">
@@ -148,7 +141,6 @@ const DatasetAnalytics: React.FC<DatasetAnalyticsProps> = ({
           </div>
         </div>
 
-        {/* Topic Distribution */}
         {results.length > 0 && results[0].visualizationData.topicClusters.length > 0 && (
           <div>
             <h3 className="text-lg font-semibold text-black mb-4">Topic Clusters</h3>
@@ -174,7 +166,6 @@ const DatasetAnalytics: React.FC<DatasetAnalyticsProps> = ({
           </div>
         )}
 
-        {/* Document Characteristics */}
         <div>
           <h3 className="text-lg font-semibold text-black mb-4">Document Characteristics</h3>
           <div className="space-y-4">
@@ -205,7 +196,6 @@ const DatasetAnalytics: React.FC<DatasetAnalyticsProps> = ({
         </div>
       </div>
 
-      {/* Quality Metrics Comparison */}
       {metrics.qualityMetricsComparison.length > 0 && (
         <div className="mt-8">
           <h3 className="text-lg font-semibold text-black mb-4">Summarization Quality Comparison</h3>
@@ -274,7 +264,6 @@ const DatasetAnalytics: React.FC<DatasetAnalyticsProps> = ({
         </div>
       )}
 
-      {/* Document Metadata */}
       <div className="mt-8 pt-6 border-t border-grey-200">
         <h3 className="text-lg font-semibold text-black mb-4">Document Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">

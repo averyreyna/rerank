@@ -21,7 +21,6 @@ const SentenceGraph: React.FC<SentenceGraphProps> = ({
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
 
-    // Create links from node connections
     const links = nodes.flatMap(node => 
       node.connections.map(conn => ({
         source: node.id,
@@ -30,14 +29,12 @@ const SentenceGraph: React.FC<SentenceGraphProps> = ({
       }))
     );
 
-    // Set up force simulation
     const simulation = d3.forceSimulation(nodes as any)
       .force('link', d3.forceLink(links).id((d: any) => d.id).strength(0.1))
       .force('charge', d3.forceManyBody().strength(-50))
       .force('center', d3.forceCenter(width / 2, height / 2))
       .force('collision', d3.forceCollide(30));
 
-    // Create link elements
     const link = svg.append('g')
       .selectAll('line')
       .data(links)
@@ -46,22 +43,20 @@ const SentenceGraph: React.FC<SentenceGraphProps> = ({
       .attr('stroke-opacity', 0.6)
       .attr('stroke-width', (d: any) => Math.sqrt(d.weight * 5));
 
-    // Create node elements
     const node = svg.append('g')
       .selectAll('circle')
       .data(nodes)
       .enter().append('circle')
       .attr('r', (d: any) => 5 + d.score * 15)
       .attr('fill', (d: any) => {
-        if (d.sentiment > 0.1) return '#10B981'; // Positive - green
-        if (d.sentiment < -0.1) return '#EF4444'; // Negative - red
-        return '#6B7280'; // Neutral - gray
+        if (d.sentiment > 0.1) return '#10B981';
+        if (d.sentiment < -0.1) return '#EF4444';
+        return '#6B7280';
       })
       .attr('stroke', '#fff')
       .attr('stroke-width', 2)
       .style('cursor', 'pointer');
 
-    // Add text labels
     const text = svg.append('g')
       .selectAll('text')
       .data(nodes)
@@ -74,7 +69,6 @@ const SentenceGraph: React.FC<SentenceGraphProps> = ({
       .attr('dy', '.35em')
       .style('pointer-events', 'none');
 
-    // Add tooltips
     const tooltip = d3.select('body').append('div')
       .attr('class', 'tooltip')
       .style('opacity', 0)
@@ -106,7 +100,6 @@ const SentenceGraph: React.FC<SentenceGraphProps> = ({
           .style('opacity', 0);
       });
 
-    // Update positions on simulation tick
     simulation.on('tick', () => {
       link
         .attr('x1', (d: any) => d.source.x)
@@ -123,7 +116,6 @@ const SentenceGraph: React.FC<SentenceGraphProps> = ({
         .attr('y', (d: any) => d.y + 25);
     });
 
-    // Cleanup function
     return () => {
       simulation.stop();
       tooltip.remove();

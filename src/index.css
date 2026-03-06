@@ -1,4 +1,3 @@
-/* ABC Diatype Font Family */
 @font-face {
   font-family: 'ABC Diatype';
   src: url('./assets/fonts/ABC%20Diatype/ABCDiatype-Thin-Trial.woff2') format('woff2'),
@@ -147,7 +146,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Design System Colors */
 :root {
   --color-white: #ffffff;
   --color-black: #000000;
@@ -163,7 +161,6 @@
   --color-grey-900: #171717;
 }
 
-/* Base styles */
 body {
   font-family: 'ABC Diatype', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
 }

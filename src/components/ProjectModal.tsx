@@ -10,15 +10,12 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-black bg-opacity-50"
         onClick={onClose}
       />
-      
-      {/* Modal */}
+
       <div className="relative bg-white rounded-lg shadow-lg max-w-lg w-full mx-4 p-6">
-        {/* Close button */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-grey-400 hover:text-grey-600 transition-colors"
@@ -34,7 +31,6 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ isOpen, onClose }) => {
           </svg>
         </button>
 
-        {/* Modal content */}
         <div>
           <h2 className="text-xl font-semibold text-black mb-4">About Rerank</h2>
           

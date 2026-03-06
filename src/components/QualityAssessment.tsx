@@ -36,7 +36,6 @@ const QualityAssessment: React.FC<QualityAssessmentProps> = ({
   results, 
   originalText 
 }) => {
-  // Calculate cosine similarity between two texts
   const calculateSimilarity = (text1: string, text2: string): number => {
     const words1 = text1.toLowerCase().split(/\s+/);
     const words2 = text2.toLowerCase().split(/\s+/);
@@ -53,7 +52,6 @@ const QualityAssessment: React.FC<QualityAssessmentProps> = ({
     return magnitude1 && magnitude2 ? dotProduct / (magnitude1 * magnitude2) : 0;
   };
 
-  // Calculate Jaccard similarity for sentence overlap
   const calculateJaccardSimilarity = (sentences1: string[], sentences2: string[]): number => {
     const set1 = new Set(sentences1.map(s => s.toLowerCase().trim()));
     const set2 = new Set(sentences2.map(s => s.toLowerCase().trim()));
@@ -72,7 +70,6 @@ const QualityAssessment: React.FC<QualityAssessmentProps> = ({
     return union.size > 0 ? intersection.size / union.size : 0;
   };
 
-  // Analyze inter-method agreement
   const analyzeAgreement = (): AgreementAnalysis => {
     if (results.length < 2) {
       return {
@@ -87,7 +84,6 @@ const QualityAssessment: React.FC<QualityAssessmentProps> = ({
     let totalSimilarity = 0;
     let comparisons = 0;
 
-    // Calculate pairwise similarities
     for (let i = 0; i < results.length; i++) {
       for (let j = i + 1; j < results.length; j++) {
         const textSimilarity = calculateSimilarity(results[i].summary, results[j].summary);
@@ -108,8 +104,7 @@ const QualityAssessment: React.FC<QualityAssessmentProps> = ({
     }
 
     const overallAgreement = comparisons > 0 ? totalSimilarity / comparisons : 0;
-    
-    // Identify disagreement areas
+
     const disagreementAreas: string[] = [];
     const lowAgreements = pairwiseAgreements.filter(p => p.confidence === 'low');
     
@@ -120,8 +115,7 @@ const QualityAssessment: React.FC<QualityAssessmentProps> = ({
     if (overallAgreement < 0.3) {
       disagreementAreas.push('Methods produce significantly different summaries');
     }
-    
-    // Calculate consensus strength
+
     const highAgreements = pairwiseAgreements.filter(p => p.confidence === 'high').length;
     const consensusStrength = comparisons > 0 ? highAgreements / comparisons : 0;
 
@@ -133,13 +127,11 @@ const QualityAssessment: React.FC<QualityAssessmentProps> = ({
     };
   };
 
-  // Analyze quality indicators
   const analyzeQualityIndicators = (): QualityIndicators => {
     const methodConfidence = results.map(result => {
       const issues: string[] = [];
       let confidence = result.qualityMetrics.confidence;
-      
-      // Adjust confidence based on various factors
+
       if (result.qualityMetrics.coverage < 0.5) {
         issues.push('Low content coverage');
         confidence *= 0.8;
@@ -158,8 +150,7 @@ const QualityAssessment: React.FC<QualityAssessmentProps> = ({
       if (result.processingTime > 5000) {
         issues.push('Unusually long processing time');
       }
-      
-      // Special considerations for different methods
+
       if (result.method === 'BART' && result.summary.length < 50) {
         issues.push('Unusually short BART summary');
         confidence *= 0.9;
@@ -180,13 +171,11 @@ const QualityAssessment: React.FC<QualityAssessmentProps> = ({
       };
     });
 
-    // Calculate consistency score
     const confidenceValues = methodConfidence.map(m => m.confidence);
     const avgConfidence = confidenceValues.reduce((sum, val) => sum + val, 0) / confidenceValues.length;
     const variance = confidenceValues.reduce((sum, val) => sum + Math.pow(val - avgConfidence, 2), 0) / confidenceValues.length;
     const consistencyScore = Math.max(0, 1 - variance);
 
-    // Detect outliers
     const outlierDetection = methodConfidence.map(method => {
       const deviation = Math.abs(method.confidence - avgConfidence);
       return {
@@ -213,8 +202,7 @@ const QualityAssessment: React.FC<QualityAssessmentProps> = ({
   return (
     <div className="mt-8 bg-white rounded-lg border border-grey-200 p-6">
       <h2 className="text-xl font-bold text-black mb-6">Quality Assessment Tools</h2>
-      
-      {/* Overall Quality Score */}
+
       <div className="mb-8 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="text-center">
@@ -239,7 +227,6 @@ const QualityAssessment: React.FC<QualityAssessmentProps> = ({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Inter-Method Agreement */}
         <div>
           <h3 className="text-lg font-semibold text-black mb-4">Inter-Method Agreement</h3>
           <div className="space-y-3">
@@ -287,7 +274,6 @@ const QualityAssessment: React.FC<QualityAssessmentProps> = ({
           </div>
         </div>
 
-        {/* Method Confidence & Reliability */}
         <div>
           <h3 className="text-lg font-semibold text-black mb-4">Method Confidence & Reliability</h3>
           <div className="space-y-3">
@@ -325,7 +311,6 @@ const QualityAssessment: React.FC<QualityAssessmentProps> = ({
             ))}
           </div>
 
-          {/* Outlier Detection */}
           {qualityIndicators.outlierDetection.some(o => o.isOutlier) && (
             <div className="mt-4 p-3 bg-orange-50 rounded">
               <h4 className="font-semibold text-orange-800 mb-2">⚠️ Outlier Detection</h4>
@@ -343,7 +328,6 @@ const QualityAssessment: React.FC<QualityAssessmentProps> = ({
         </div>
       </div>
 
-      {/* Recommendations */}
       <div className="mt-8 p-4 bg-green-50 rounded-lg">
         <h3 className="text-lg font-semibold text-green-800 mb-3">📋 Annotation Recommendations</h3>
         <div className="text-sm text-green-700 space-y-2">
