@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface PasswordGateProps {
   onUnlock: () => void;
@@ -9,12 +9,26 @@ export default function PasswordGate({ onUnlock }: PasswordGateProps) {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // CRA expects env vars to be prefixed with REACT_APP_
   const expectedPassword =
-    // Prefer CRA-exposed variable, but keep a fallback for local dev/config mismatches.
     process.env.REACT_APP_PASSWORD ||
     (process.env as unknown as { REANK_PASSWORD?: string }).REANK_PASSWORD ||
     'change-me-password';
+
+  useEffect(() => {
+    const prevBodyOverflow = document.body.style.overflow;
+    const prevHtmlOverflow = document.documentElement.style.overflow;
+
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = prevBodyOverflow;
+      document.documentElement.style.overflow = prevHtmlOverflow;
+    };
+  }, []);
+
+  const isCorrect = password.trim().length > 0 && password === expectedPassword;
+  const showIncorrect = !!error;
 
   const handleSubmit = async () => {
     if (!password.trim()) return;
@@ -41,7 +55,7 @@ export default function PasswordGate({ onUnlock }: PasswordGateProps) {
   };
 
   return (
-    <div className="min-h-screen bg-grey-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-grey-50 flex items-center justify-center p-4 overflow-hidden">
       <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6 border border-grey-200">
         <div className="mb-4">
           <h1 className="text-xl sm:text-2xl font-bold text-black leading-tight">
@@ -61,19 +75,58 @@ export default function PasswordGate({ onUnlock }: PasswordGateProps) {
           to continue.
         </p>
 
-        <input
-          type="password"
-          className="w-full p-2 border border-grey-300 rounded-md mb-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-grey-400"
-          placeholder="Enter access password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          onKeyDown={handleKeyDown}
-          autoFocus
-          aria-label="Access password"
-        />
+        <div className="relative mb-3">
+          <input
+            type="password"
+            className="w-full p-2 pr-10 border border-grey-300 rounded-md text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-grey-400"
+            placeholder="Enter access password"
+            value={password}
+            onChange={(e) => {
+              const next = e.target.value;
+              setPassword(next);
+
+              if (error && next === expectedPassword) setError(null);
+            }}
+            onKeyDown={handleKeyDown}
+            autoFocus
+            aria-label="Access password"
+            aria-invalid={showIncorrect || undefined}
+            aria-describedby={error ? 'password-gate-error' : undefined}
+          />
+
+          {isCorrect ? (
+            <span
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-green-600"
+              aria-hidden="true"
+            >
+              <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
+                <path
+                  d="M16.7 5.7c.4.4.4 1 0 1.4l-8.3 8.3c-.4.4-1 .4-1.4 0L3.3 11.7c-.4-.4-.4-1 0-1.4s1-.4 1.4 0l2.3 2.3 7.6-7.6c.4-.4 1-.4 1.4 0Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </span>
+          ) : showIncorrect ? (
+            <span
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-red-500"
+              aria-hidden="true"
+            >
+              <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
+                <path
+                  d="M6.2 6.2a1 1 0 0 1 1.4 0L10 8.6l2.4-2.4a1 1 0 1 1 1.4 1.4L11.4 10l2.4 2.4a1 1 0 0 1-1.4 1.4L10 11.4l-2.4 2.4a1 1 0 0 1-1.4-1.4L8.6 10 6.2 7.6a1 1 0 0 1 0-1.4Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </span>
+          ) : null}
+        </div>
 
         {error && (
-          <p className="text-sm text-red-500 mb-3" role="alert">
+          <p
+            id="password-gate-error"
+            className="text-sm text-red-500 mb-3"
+            role="alert"
+          >
             {error}
           </p>
         )}

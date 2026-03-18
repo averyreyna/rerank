@@ -62,7 +62,7 @@ function App() {
           try {
             window.localStorage.setItem(ACCESS_FLAG_KEY, 'true');
           } catch {
-            // Ignore localStorage errors; UI will still unlock for this session.
+            // ignore localStorage errors, the ui will still unlock for this session
           }
         }}
       />
