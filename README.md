@@ -34,6 +34,14 @@ npm install
 npm start
 ```
 
+You can also optionally gate access to the app behind a simple global password:
+
+```
+REACT_APP_PASSWORD=your_shared_password_here
+```
+
+This is a frontend-only access gate intended for light protection (for example, to keep casual visitors out of a demo). It does **not** provide strong security—determined users can still inspect client-side code and network traffic.
+
 4. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
 ## Available Scripts

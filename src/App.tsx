@@ -3,12 +3,15 @@ import FileUpload from './components/FileUpload';
 import SummaryResults from './components/SummaryResults';
 import InfoButton from './components/InfoButton';
 import ProjectModal from './components/ProjectModal';
+import PasswordGate from './components/PasswordGate';
 import { 
   textRankSummarize, 
   lexRankSummarize, 
   bartSummarize,
   SummaryResult 
 } from './utils/textSummarization';
+
+const ACCESS_FLAG_KEY = 'rerank_has_access';
 
 function App() {
   const [results, setResults] = useState<SummaryResult[]>([]);
@@ -17,6 +20,13 @@ function App() {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [numSentences, setNumSentences] = useState<number>(3);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [hasAccess, setHasAccess] = useState<boolean>(() => {
+    try {
+      return window.localStorage.getItem(ACCESS_FLAG_KEY) === 'true';
+    } catch {
+      return false;
+    }
+  });
 
   const handleFileSelect = useCallback(async (content: string, fileName: string) => {
     setIsProcessing(true);
@@ -43,6 +53,21 @@ function App() {
       setIsProcessing(false);
     }
   }, [numSentences]);
+
+  if (!hasAccess) {
+    return (
+      <PasswordGate
+        onUnlock={() => {
+          setHasAccess(true);
+          try {
+            window.localStorage.setItem(ACCESS_FLAG_KEY, 'true');
+          } catch {
+            // Ignore localStorage errors; UI will still unlock for this session.
+          }
+        }}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-grey-50 font-abc-diatype">
